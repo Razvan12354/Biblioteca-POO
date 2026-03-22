@@ -8,6 +8,7 @@ class Abonati{
     int varsta, durataAbonament, nrCartiImprumutate;
     public:
 
+// Constructor cu parametri
     Abonati(const char *var_nume, const char *var_prenume, const char *var_telefon, const int var_varsta, const int var_durataAbonament, const int var_nrCartiImprumutate){
         this->nume = new char[strlen(var_nume)+1];
         strcpy(this->nume,var_nume);
@@ -25,6 +26,7 @@ class Abonati{
         this->nrCartiImprumutate = var_nrCartiImprumutate;
     }
 
+// Constructor de copiere
     Abonati(const Abonati& nou){
         this->nume = new char[strlen(nou.nume)+1];
         strcpy(nume,nou.nume);
@@ -42,6 +44,7 @@ class Abonati{
         this->nrCartiImprumutate = nou.nrCartiImprumutate;
     }
 
+// Getters
     char* getNume() const{
         return nume;
     }
@@ -61,6 +64,7 @@ class Abonati{
         return nrCartiImprumutate;
     }
 
+// Setters
     void setNume(const char* nume){
         delete[] this->nume;
         this->nume = new char[strlen(nume)+1];
@@ -85,14 +89,15 @@ class Abonati{
     void setNrCartiImprumutate(const int nrCartiImprumutate){
         this->nrCartiImprumutate = nrCartiImprumutate;
     }
-
+// Verifica daca abonamentul expira in urmatoarea luna
     void alertaReinnoire(){
-        if (this -> durataAbonament < 3)
+        if (this -> durataAbonament <= 1)
             cout<<"Abonatul trebuie sa reinnoiasca abonamentul"<<endl;
         else
             cout<<"Abonatul nu trebuie sa reinnoiasca abonamentul"<<endl;
     }
 
+// Calcualre scor de fidelitate pe baza duratei abonamentului, nr. de carti imprumutate si vartei
     void scorIncredere() const {
         double scorIncredere = 0;
         if (durataAbonament > 12) scorIncredere += 40;
@@ -104,6 +109,7 @@ class Abonati{
         cout << "Scor incredere: " << scorIncredere << endl;
     }
 
+// Destructor
     ~Abonati(){
         cout<<nume<<" "<<prenume<<" "<<telefon<<" "<<varsta<<" "<<durataAbonament<<" "<<nrCartiImprumutate << endl;
         delete[] nume;

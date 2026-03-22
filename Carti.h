@@ -8,6 +8,7 @@ class Carti{
     int anAparitie, nrPagini;
     public:
 
+// Constructor cu parametri
     Carti(const char *var_titlu, const char *var_autor, const char *var_editura, const int var_anAparitie, const int var_nrPagini){
         this->titlu = new char[strlen(var_titlu)+1];
         strcpy(this->titlu,var_titlu);
@@ -23,6 +24,7 @@ class Carti{
         this->nrPagini = var_nrPagini;
     }
 
+// Constructor de copiere
     Carti(const Carti& nou){
         this->titlu = new char[strlen(nou.titlu)+1];
         strcpy(titlu,nou.titlu);
@@ -38,6 +40,7 @@ class Carti{
         this->nrPagini = nou.nrPagini;
     }
 
+// Getters
     char* getTitlu() const{
         return titlu;
     }
@@ -54,6 +57,7 @@ class Carti{
         return nrPagini;
     }
 
+// Setters
     void setTitlu(const char* titlu){
         delete[] this->titlu;
         this->titlu = new char[strlen(titlu)+1];
@@ -76,14 +80,14 @@ class Carti{
         this->nrPagini = nrPagini;
     }
 
-
+// Declarare functie prietena
     friend void afiseazaInfoScurt(const Carti& c);
-
+// Supraincarcarea operatorului << ca functie prietena 
     friend ostream& operator<<(ostream& out, const Carti& c) {
         out<< " " << c.titlu << " " << c.autor << " " << c.editura;
         return out;
     }
-
+// Destructor
     ~Carti(){
         cout<<titlu<<" "<<autor<<" "<<editura<<" "<<anAparitie<<" "<<nrPagini<<endl;
         delete[] titlu;
@@ -91,7 +95,7 @@ class Carti{
         delete[] editura;
     }
 };
-
+// Implementarea functiei prietene
 void afiseazaInfoScurt(const Carti& c) {
     cout << "INFO PRIETENA: " << c.titlu << " a aparut in anul " << c.anAparitie << "." << endl;
 }

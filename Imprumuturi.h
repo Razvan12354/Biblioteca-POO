@@ -9,6 +9,7 @@ class Imprumuturi{
 	int perioadaZile;
 	public:
 
+// Constructor cu parametri
 	Imprumuturi(const char* var_nume, const char* var_titlu, const char* var_dataImprumut, const int var_perioada){
 		this->numeAbonat = new char[strlen(var_nume)+1];
 		strcpy(this->numeAbonat, var_nume);
@@ -22,6 +23,7 @@ class Imprumuturi{
 		this->perioadaZile = var_perioada;
 	}
 
+// Constructor de copiere
 	Imprumuturi(const Imprumuturi& other){
 		this->numeAbonat = new char[strlen(other.numeAbonat)+1];
 		strcpy(this->numeAbonat, other.numeAbonat);
@@ -35,11 +37,13 @@ class Imprumuturi{
 		this->perioadaZile = other.perioadaZile;
 	}
 
+// Getters
 	char* getNumeAbonat() const{ return numeAbonat; }
 	char* getTitluCarte() const{ return titluCarte; }
 	char* getDataImprumut() const{ return dataImprumut; }
 	int getPerioadaZile() const{ return perioadaZile; }
 
+// Setters
 	void setNumeAbonat(const char* nume){
 		delete[] this->numeAbonat;
 		this->numeAbonat = new char[strlen(nume)+1];
@@ -56,24 +60,19 @@ class Imprumuturi{
 		strcpy(this->dataImprumut, data);
 	}
 	void setPerioadaZile(const int perioada){ this->perioadaZile = perioada; }
-
-
-	~Imprumuturi(){
-		cout << numeAbonat << " " << titluCarte << " " << dataImprumut << " " << perioadaZile << endl;
-		delete[] numeAbonat;
-		delete[] titluCarte;
-		delete[] dataImprumut;
-	}
-    
+// Calculeaza data la care trebuie returnata cartea si afiseaza daca este in termen sau intarziat
     void afiseazaScadenta() const{
         struct tm tm_imprumut = {0};
         int d = 0, m = 0, y = 0;
         struct tm data_struct = {0};
+
+		// Extrage ziua, luna si anul din sirul de caractere (format DD.MM.YYYY)
         if (sscanf(dataImprumut, "%d.%d.%d", &d, &m, &y) == 3){
             data_struct.tm_mday = d;
             data_struct.tm_mon = m - 1;
             data_struct.tm_year = y - 1900;
 
+			// Convertim in secunde, adaugam perioada de imprumut si convertim inapoi la structura de data
             time_t timp_secunde = mktime(&data_struct);
             timp_secunde += (perioadaZile * 24 * 60 * 60);
 
@@ -82,6 +81,7 @@ class Imprumuturi{
             cout << "Carte: " << titluCarte << endl;
             cout << "Data scadentei: " << data_finala->tm_mday << "." << data_finala->tm_mon + 1 << "." << (data_finala->tm_year + 1900) << endl;
 
+			// Verifica daca data curenta a depasit data scadentei
             time_t acum = time(0);
             if (acum > timp_secunde) {
                 int zile_intarziere = (int)(difftime(acum, timp_secunde) / 86400);
@@ -92,6 +92,7 @@ class Imprumuturi{
         }
     }
 
+	// Supraincarcarea functiei afiseazaScadenta pentru a adauga zile bonus la perioada de imprumut
     void afiseazaScadenta(int zileBonus) const{
         struct tm tm_imprumut = {0};
         int d = 0, m = 0, y = 0;
@@ -118,5 +119,13 @@ class Imprumuturi{
             }
         }
     }
+
+	// Destructor
+	~Imprumuturi(){
+		cout << numeAbonat << " " << titluCarte << " " << dataImprumut << " " << perioadaZile << endl;
+		delete[] numeAbonat;
+		delete[] titluCarte;
+		delete[] dataImprumut;
+	}
 
 };
