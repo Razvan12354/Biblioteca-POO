@@ -4,24 +4,27 @@ using namespace std;
 
 class Carti{
     private:
-    char*titlu, *autor, *editura;
-    int anAparitie, nrPagini;
+    char*titlu, *autor, *idCarte;
+    int anAparitie, stocDisponibil;
+    static int nrTotalCarti;
     public:
 
 // Constructor cu parametri
-    Carti(const char *var_titlu, const char *var_autor, const char *var_editura, const int var_anAparitie, const int var_nrPagini){
+    Carti(const char *var_titlu, const char *var_autor, const char *var_idCarte, const int var_anAparitie, const int var_stocDisponibil){
         this->titlu = new char[strlen(var_titlu)+1];
         strcpy(this->titlu,var_titlu);
 
         this->autor = new char[strlen(var_autor)+1];
         strcpy(this->autor,var_autor);
 
-        this->editura = new char[strlen(var_editura)+1];
-        strcpy(this->editura,var_editura);
+        this->idCarte = new char[strlen(var_idCarte)+1];
+        strcpy(this->idCarte,var_idCarte);
 
         this->anAparitie = var_anAparitie;
 
-        this->nrPagini = var_nrPagini;
+        this->stocDisponibil = var_stocDisponibil;
+
+        nrTotalCarti++;
     }
 
 // Constructor de copiere
@@ -32,70 +35,103 @@ class Carti{
         this->autor = new char[strlen(nou.autor)+1];
         strcpy(autor,nou.autor);
 
-        this->editura = new char[strlen(nou.editura)+1];
-        strcpy(editura,nou.editura);
+        this->idCarte = new char[strlen(nou.idCarte)+1];
+        strcpy(idCarte,nou.idCarte);
 
         this->anAparitie = nou.anAparitie;
 
-        this->nrPagini = nou.nrPagini;
+        this->stocDisponibil = nou.stocDisponibil;
+
+        nrTotalCarti++;
     }
+    
 
 // Getters
-    char* getTitlu() const{
+    inline char* getTitlu() const{
         return titlu;
     }
-    char* getAutor() const{
+    inline char* getAutor() const{
         return autor;
     }
-    char* getEditura() const{
-        return editura;
+    inline char* getIdCarte() const{
+        return idCarte;
     }
-    int getAnAparitie() const{
+    inline int getAnAparitie() const{
         return anAparitie;
     }
-    int getNrPagini() const{
-        return nrPagini;
+    inline int getStocDisponibil() const{
+        return stocDisponibil;
+    }
+    inline static int getNrTotalCarti() {
+         return nrTotalCarti; 
     }
 
 // Setters
-    void setTitlu(const char* titlu){
+    inline void setTitlu(const char* titlu){
         delete[] this->titlu;
         this->titlu = new char[strlen(titlu)+1];
         strcpy(this->titlu,titlu);
     }
-    void setAutor(const char* autor){
+    inline void setAutor(const char* autor){
         delete[] this->autor;
         this->autor = new char[strlen(autor)+1];
         strcpy(this->autor,autor);
     }
-    void setEditura(const char* editura){
-        delete[] this->editura;
-        this->editura = new char[strlen(editura)+1];
-        strcpy(this->editura,editura);
+    inline void setIdCarte(const char* id){
+        delete[] this->idCarte;
+        this->idCarte = new char[strlen(id)+1];
+        strcpy(this->idCarte,id);
     }
-    void setAnAparitie(const int anAparitie){
+    inline void setAnAparitie(const int anAparitie){
         this->anAparitie = anAparitie;
     }
-    void setNrPagini(const int nrPagini){
-        this->nrPagini = nrPagini;
+    inline void setStocDisponibil(const int stocDisponibil){
+        this->stocDisponibil = stocDisponibil;
+    }
+
+// operator=
+    Carti& operator=(const Carti& nou){
+        delete[] titlu;
+        delete[] autor;
+        delete[] idCarte;
+
+        this->titlu = new char[strlen(nou.titlu)+1];
+        strcpy(titlu,nou.titlu);
+
+        this->autor = new char[strlen(nou.autor)+1];
+        strcpy(autor,nou.autor);
+
+        this->idCarte = new char[strlen(nou.idCarte)+1];
+        strcpy(idCarte,nou.idCarte);
+
+        this->anAparitie = nou.anAparitie;
+
+        this->stocDisponibil = nou.stocDisponibil;
+
+        return *this;
     }
 
 // Declarare functie prietena
     friend void afiseazaInfoScurt(const Carti& c);
+    
 // Supraincarcarea operatorului << ca functie prietena 
     friend ostream& operator<<(ostream& out, const Carti& c) {
-        out<< " " << c.titlu << " " << c.autor << " " << c.editura;
+        out<< " " << c.titlu << " " << c.autor << " " << c.anAparitie << " " << c.stocDisponibil;
         return out;
     }
+
 // Destructor
     ~Carti(){
-        cout<<titlu<<" "<<autor<<" "<<editura<<" "<<anAparitie<<" "<<nrPagini<<endl;
+        cout << "Destructor: " << titlu <<" " << autor << " " << anAparitie << " " << stocDisponibil << endl;
         delete[] titlu;
         delete[] autor;
-        delete[] editura;
+        delete[] idCarte;
+        nrTotalCarti--;
     }
 };
 // Implementarea functiei prietene
 void afiseazaInfoScurt(const Carti& c) {
-    cout << "INFO PRIETENA: " << c.titlu << " a aparut in anul " << c.anAparitie << "." << endl;
+    cout << c.titlu << " a aparut in anul " << c.anAparitie << "." << endl;
 }
+
+int Carti::nrTotalCarti = 0;

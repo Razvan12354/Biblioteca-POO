@@ -1,131 +1,179 @@
 #include <iostream>
 #include <cstring>
-#include <ctime>
 using namespace std;
 
 class Imprumuturi{
 	private:
-	char* numeAbonat, *titluCarte, *dataImprumut;
+	char *CNP, *idCarte, *dataImprumut;
 	int perioadaZile;
+	bool esteReturnata;
+	Carti *carteImprumutata;
+	Abonati *abonatAsociat;
+	static float taxaPenalizarePeZi;
 	public:
 
 // Constructor cu parametri
-	Imprumuturi(const char* var_nume, const char* var_titlu, const char* var_dataImprumut, const int var_perioada){
-		this->numeAbonat = new char[strlen(var_nume)+1];
-		strcpy(this->numeAbonat, var_nume);
+	Imprumuturi(Abonati& a, Carti& c, const char* var_dataImprumut, const int var_perioada){
 
-		this->titluCarte = new char[strlen(var_titlu)+1];
-		strcpy(this->titluCarte, var_titlu);
+		this->abonatAsociat = &a;
 
+		this->CNP = new char[strlen(a.getCNP())+1];
+		strcpy(this->CNP, a.getCNP());
+
+		this->idCarte = new char[strlen(c.getIdCarte())+1];
+		strcpy(this->idCarte, c.getIdCarte());
 		this->dataImprumut = new char[strlen(var_dataImprumut)+1];
 		strcpy(this->dataImprumut, var_dataImprumut);
 
+		this->esteReturnata = false;
+
 		this->perioadaZile = var_perioada;
+
+		this->carteImprumutata = &c;
+
+		int stocActual = c.getStocDisponibil();
+		if (stocActual > 0) {
+
+			c.setStocDisponibil(stocActual - 1);
+			int nrCurentCarti = a.getNrCartiImprumutate();
+			a.setNrCartiImprumutate(nrCurentCarti + 1);
+
+			cout << "Imprumut realizat cu succes pentru cartea " << c.getTitlu() << " cu ID " << c.getIdCarte() << ". Stoc ramas: " << c.getStocDisponibil() << endl << endl;
+		} else {
+			cout << "ATENTIE: Stoc epuizat pentru cartea " << c.getTitlu() << " cu ID " << c.getIdCarte() << "! Imprumut realizat FARA stoc." << endl << endl;
+		}
 	}
-
+	
 // Constructor de copiere
-	Imprumuturi(const Imprumuturi& other){
-		this->numeAbonat = new char[strlen(other.numeAbonat)+1];
-		strcpy(this->numeAbonat, other.numeAbonat);
+	Imprumuturi(const Imprumuturi& nou){
+		this->CNP = new char[strlen(nou.CNP)+1];
+		strcpy(this->CNP, nou.CNP);
 
-		this->titluCarte = new char[strlen(other.titluCarte)+1];
-		strcpy(this->titluCarte, other.titluCarte);
+		this->idCarte = new char[strlen(nou.idCarte)+1];
+		strcpy(this->idCarte, nou.idCarte);
+		this->dataImprumut = new char[strlen(nou.dataImprumut)+1];
+		strcpy(this->dataImprumut, nou.dataImprumut);
 
-		this->dataImprumut = new char[strlen(other.dataImprumut)+1];
-		strcpy(this->dataImprumut, other.dataImprumut);
+		this->perioadaZile = nou.perioadaZile;
 
-		this->perioadaZile = other.perioadaZile;
+		this->esteReturnata = nou.esteReturnata;
+
+		this->carteImprumutata = nou.carteImprumutata;
+
+		this->abonatAsociat = nou.abonatAsociat;
 	}
 
 // Getters
-	char* getNumeAbonat() const{ return numeAbonat; }
-	char* getTitluCarte() const{ return titluCarte; }
-	char* getDataImprumut() const{ return dataImprumut; }
-	int getPerioadaZile() const{ return perioadaZile; }
+	inline char* getCNP() const{ return CNP; }
+	inline char* getIdCarte() const{ return idCarte; }
+	inline char* getDataImprumut() const{ return dataImprumut; }
+	inline int getPerioadaZile() const{ return perioadaZile; }
 
 // Setters
-	void setNumeAbonat(const char* nume){
-		delete[] this->numeAbonat;
-		this->numeAbonat = new char[strlen(nume)+1];
-		strcpy(this->numeAbonat, nume);
+	inline void setCNP(const char* CNP){
+		delete[] this->CNP;
+		this->CNP = new char[strlen(CNP)+1];
+		strcpy(this->CNP, CNP);
 	}
-	void setTitluCarte(const char* titlu){
-		delete[] this->titluCarte;
-		this->titluCarte = new char[strlen(titlu)+1];
-		strcpy(this->titluCarte, titlu);
+	inline void setIdCarte(const char* id){
+		delete[] this->idCarte;
+		this->idCarte = new char[strlen(id)+1];
+		strcpy(this->idCarte, id);
 	}
-	void setDataImprumut(const char* data){
+	inline void setDataImprumut(const char* data){
 		delete[] this->dataImprumut;
 		this->dataImprumut = new char[strlen(data)+1];
 		strcpy(this->dataImprumut, data);
 	}
-	void setPerioadaZile(const int perioada){ this->perioadaZile = perioada; }
-// Calculeaza data la care trebuie returnata cartea si afiseaza daca este in termen sau intarziat
-    void afiseazaScadenta() const{
-        struct tm tm_imprumut = {0};
-        int d = 0, m = 0, y = 0;
-        struct tm data_struct = {0};
+	inline void setPerioadaZile(const int perioada){ this->perioadaZile = perioada; 
+	}
 
-		// Extrage ziua, luna si anul din sirul de caractere (format DD.MM.YYYY)
-        if (sscanf(dataImprumut, "%d.%d.%d", &d, &m, &y) == 3){
-            data_struct.tm_mday = d;
-            data_struct.tm_mon = m - 1;
-            data_struct.tm_year = y - 1900;
+// operator=
+	Imprumuturi& operator=(const Imprumuturi& nou){
+		delete[] CNP;
+		delete[] idCarte;
+		delete[] dataImprumut;
 
-			// Convertim in secunde, adaugam perioada de imprumut si convertim inapoi la structura de data
-            time_t timp_secunde = mktime(&data_struct);
-            timp_secunde += (perioadaZile * 24 * 60 * 60);
+		this->CNP = new char[strlen(nou.CNP)+1];
+		strcpy(this->CNP, nou.CNP);
 
-            struct tm *data_finala = localtime(&timp_secunde);
+		this->idCarte = new char[strlen(nou.idCarte)+1];
+		strcpy(this->idCarte, nou.idCarte);
+		this->dataImprumut = new char[strlen(nou.dataImprumut)+1];
+		strcpy(this->dataImprumut, nou.dataImprumut);
 
-            cout << "Carte: " << titluCarte << endl;
-            cout << "Data scadentei: " << data_finala->tm_mday << "." << data_finala->tm_mon + 1 << "." << (data_finala->tm_year + 1900) << endl;
+		this->perioadaZile = nou.perioadaZile;
 
-			// Verifica daca data curenta a depasit data scadentei
-            time_t acum = time(0);
-            if (acum > timp_secunde) {
-                int zile_intarziere = (int)(difftime(acum, timp_secunde) / 86400);
-                cout << "Status: Intarziat cu " << zile_intarziere << " zile." << endl;
-            } else {
-                cout << "Status: In termen." << endl;
-            }
-        }
-    }
+		this->esteReturnata = nou.esteReturnata;
 
-	// Supraincarcarea functiei afiseazaScadenta pentru a adauga zile bonus la perioada de imprumut
-    void afiseazaScadenta(int zileBonus) const{
-        struct tm tm_imprumut = {0};
-        int d = 0, m = 0, y = 0;
-        struct tm data_struct = {0};
-        if (sscanf(dataImprumut, "%d.%d.%d", &d, &m, &y) == 3){
-            data_struct.tm_mday = d + zileBonus;
-            data_struct.tm_mon = m - 1;
-            data_struct.tm_year = y - 1900;
+		this->carteImprumutata = nou.carteImprumutata;
 
-            time_t timp_secunde = mktime(&data_struct);
-            timp_secunde += (perioadaZile * 24 * 60 * 60);
+		this->abonatAsociat = nou.abonatAsociat;
 
-            struct tm *data_finala = localtime(&timp_secunde);
+		return *this;
+	}
 
-            cout << "Carte: " << titluCarte << endl;
-            cout << "Data scadentei: " << data_finala->tm_mday << "." << data_finala->tm_mon + 1 << "." << (data_finala->tm_year + 1900) << endl;
+// Supraincarcarea operatorului << ca functie prietena 
+	friend ostream& operator<<(ostream& out, const Imprumuturi& i) {
+    out << "Imprumut: " << i.CNP << " a luat '" << i.idCarte 
+        << "' la data de " << i.dataImprumut;
+    return out;
+}
+// Finalizare imprumutului fara a specifica zilele scurse
+	void finalizeazaImprumut() {
+		if (this->esteReturnata == false) {
+			this->esteReturnata = true;
+			abonatAsociat->setNrCartiImprumutate(abonatAsociat->getNrCartiImprumutate() - 1);
+			int stocNou = carteImprumutata->getStocDisponibil() + 1;
+			carteImprumutata->setStocDisponibil(stocNou);
+			cout << "Cartea cu ID " << idCarte << " a fost returnata in termenul de " << perioadaZile << " zile de catre abonatul cu CNP " << CNP << ". Stoc nou: " << stocNou << endl << endl;
+    	}
+		else {
+			cout << "Cartea cu ID " << idCarte << " a fost deja returnata de catre abonatul cu CNP " << CNP << endl << endl;
+		}
+	}
 
-            time_t acum = time(0);
-            if (acum > timp_secunde) {
-                int zile_intarziere = (int)(difftime(acum, timp_secunde) / 86400);
-                cout << "Status: Intarziat cu " << zile_intarziere << " zile." << endl;
-            } else {
-                cout << "Status: In termen." << endl;
-            }
-        }
-    }
+// Finalizare imprumutului specificand zilele scurse (SUPRAINCARCARE)
+	void finalizeazaImprumut(int zileReale) {
+    if (this->esteReturnata == false){
+		this->esteReturnata = true;
+		abonatAsociat->setNrCartiImprumutate(abonatAsociat->getNrCartiImprumutate() - 1);
+		int stocNou = carteImprumutata->getStocDisponibil() + 1;
+		carteImprumutata->setStocDisponibil(stocNou);
+		cout << "Cartea cu ID " << idCarte << " a fost returnata in termenul de " << zileReale << " zile de catre abonatul cu CNP " << CNP << ". Stoc nou: " << stocNou << endl;
+		cout << "Termen stabilit: " << perioadaZile << " zile." << endl;
+		if (zileReale > perioadaZile) {
+				cout << "Returnare cu INTARZIERE de " << (zileReale - perioadaZile) << " zile!" << endl << endl;
+				if (abonatAsociat->scorIncredere() < 50) {
+					double penalizare = taxaPenalizarePeZi * (zileReale - perioadaZile);
+					cout << "Abonatul are un scor de incredere de " << abonatAsociat->scorIncredere() << ". Penalizare aplicata!" << endl;
+				} else {
+				double penalizare = 0.75 * taxaPenalizarePeZi * (zileReale - perioadaZile);
+				cout << "Abonatul are un scor de incredere de " << abonatAsociat->scorIncredere() << ". Penalizare redusa aplicata!" << endl;
+				abonatAsociat->adaugaPenalizare(penalizare);
+		} 
+	}
+		else {
+			cout << "Returnare la timp." << endl << endl;
+		}
+	}
+	else {
+		cout << "Cartea cu ID " << idCarte << " a fost deja returnata de catre abonatul cu CNP " << CNP << endl << endl;
+	}
+}
+
+	static void setTaxaPenalizare(float taxa) {
+		taxaPenalizarePeZi = taxa;
+		cout << "Taxa de penalizare pe zi a fost setata la: " << taxaPenalizarePeZi << " RON." << endl << endl;
+	}
 
 	// Destructor
 	~Imprumuturi(){
-		cout << numeAbonat << " " << titluCarte << " " << dataImprumut << " " << perioadaZile << endl;
-		delete[] numeAbonat;
-		delete[] titluCarte;
-		delete[] dataImprumut;
-	}
-
+			cout << "Destructor: " << CNP << " " << idCarte << " " << dataImprumut << " " << perioadaZile << endl;
+			delete[] CNP;
+			delete[] idCarte;
+			delete[] dataImprumut;
+		}
 };
+
+float Imprumuturi::taxaPenalizarePeZi = 0.5;
